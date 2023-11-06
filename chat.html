@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blue Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #3498db;
+    }
+    #chat-container {
+      width: 80%;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    #messages {
+      flex: 1;
+      list-style-type: none;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    #messages li {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    #received-messages {
+      background-color: #f1c40f;
+      text-align: left;
+      margin-right: 20%;
+    }
+    #sent-messages {
+      background-color: #3498db;
+      text-align: right;
+      margin-left: 20%;
+    }
+    #message-input {
+      padding: 10px;
+      border: none;
+      border-top: 1px solid #ccc;
+      resize: none;
+      background-color: #fff;
+      width: 100%;
+    }
+    #send-button {
+      padding: 10px;
+      border: none;
+      background-color: #3498db;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <ul id="messages"></ul>
+    <div id="received-messages" class="message-box"></div>
+    <div id="sent-messages" class="message-box"></div>
+    <input id="message-input" placeholder="Type a message..." />
+    <button id="send-button">Send</button>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const messages = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (message) {
+        socket.emit('chat message', message);
+        messageInput.value = '';
+      }
+    });
+
+    socket.on('chat message', (message) => {
+      const receivedMessages = document.getElementById('received-messages');
+      const sentMessages = document.getElementById('sent-messages');
+
+      const messageElement = document.createElement('li');
+      messageElement.textContent = message;
+
+      if (message.includes('You:')) {
+        messageElement.style.backgroundColor = '#3498db';
+        messageElement.style.textAlign = 'right';
+        sentMessages.appendChild(messageElement);
+      } else {
+        messageElement.style.backgroundColor = '#f1c40f';
+        messageElement.style.textAlign = 'left';
+        receivedMessages.appendChild(messageElement);
+      }
+
+      messages.appendChild(messageElement);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</body>
+</html>
